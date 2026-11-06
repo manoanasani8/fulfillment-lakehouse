@@ -30,6 +30,22 @@ The integration test checks those results, the quarantine reason, and the retain
 
 ## Run locally
 
+### Run the container
+
+The [GitHub container package](https://github.com/users/manoanasani8/packages/container/package/fulfillment-lakehouse) runs the bundled synthetic demo and prints the warehouse delivery metrics. Docker is required. If the package is private, sign in to GitHub Container Registry with a token that can read it. The first Spark run downloads the Delta JARs from Maven Central.
+
+```sh
+docker run --rm ghcr.io/manoanasani8/fulfillment-lakehouse:latest
+```
+
+To keep the generated Delta tables after the container exits, mount a named volume:
+
+```sh
+docker run --rm -v fulfillment-demo:/app/artifacts ghcr.io/manoanasani8/fulfillment-lakehouse:latest
+```
+
+### Run with Python
+
 Use Python 3.12 and Java 17 on Linux, macOS, or Windows Subsystem for Linux. The first run needs access to Maven Central for the Delta JARs. No cloud account or credentials are required. See the [Delta Lake quickstart](https://docs.delta.io/quick-start/) and [Spark compatibility matrix](https://docs.delta.io/releases/).
 
 ```sh
