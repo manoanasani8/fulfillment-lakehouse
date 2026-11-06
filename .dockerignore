@@ -1,0 +1,6 @@
+**
+!requirements.txt
+!lakehouse.py
+!test_lakehouse.py
+!examples/
+!examples/*.jsonl
