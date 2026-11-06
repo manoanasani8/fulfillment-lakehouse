@@ -1,0 +1,38 @@
+name: Publish Fulfillment Lakehouse container
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - Dockerfile
+      - .dockerignore
+      - .github/workflows/publish-container.yml
+permissions:
+  contents: read
+  packages: write
+concurrency:
+  group: fulfillment-container-main
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      IMAGE: ghcr.io/manoanasani8/fulfillment-lakehouse
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build image
+        run: docker build --tag "$IMAGE:sha-$GITHUB_SHA" .
+      - name: Run Spark and Delta integration test in container
+        run: docker run --rm --entrypoint python "$IMAGE:sha-$GITHUB_SHA" -m unittest -v
+      - name: Authenticate to GitHub Container Registry
+        env:
+          REGISTRY_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: printf '%s' "$REGISTRY_TOKEN" | docker login ghcr.io --username "$GITHUB_ACTOR" --password-stdin
+      - name: Push and verify image tags
+        run: |
+          docker tag "$IMAGE:sha-$GITHUB_SHA" "$IMAGE:latest"
+          docker push "$IMAGE:sha-$GITHUB_SHA"
+          docker push "$IMAGE:latest"
+          docker manifest inspect "$IMAGE:latest" >/dev/null
+          echo "Published \`$IMAGE:latest\` and \`$IMAGE:sha-$GITHUB_SHA\`." >> "$GITHUB_STEP_SUMMARY"
