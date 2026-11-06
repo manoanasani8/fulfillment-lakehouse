@@ -1,0 +1,5 @@
+artifacts/
+__pycache__/
+.venv/
+spark-warehouse/
+history.jsonl
